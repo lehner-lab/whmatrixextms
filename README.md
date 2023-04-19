@@ -1,4 +1,4 @@
-Welcome to the GitHub repository for the following publication: [An extension of the Walsh-Hadamard transform to calculate and model epistasis in genetic landscapes of arbitrary shape and complexity (Faure AJ, et al., 2023)]()
+Welcome to the GitHub repository for the following publication: [An extension of the Walsh-Hadamard transform to calculate and model epistasis in genetic landscapes of arbitrary shape and complexity (Faure AJ, et al., 2023)](https://www.biorxiv.org/content/10.1101/2023.03.06.531391v3)
 
 Here you'll find the Python code to reproduce the figures and results from the computational analyses described in the paper.
 
