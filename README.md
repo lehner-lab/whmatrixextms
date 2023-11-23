@@ -4,9 +4,10 @@ Here you'll find the Python code to reproduce the figures and results from the c
 
 # Contents
 
-* **1. [whmatrixextms-notebook.ipynb](whmatrixextms-notebook.ipynb)** Jupyter Notebook to perform benchmarking analyses and plot heat map representations of matrices.
-* **2. [whmatrixextms-trna.py](whmatrixextms-trna.py)** Python script to fit sparse models to the fitness landscape of a tRNA.
-* **3. [whmatrixextms-trna_plot.py](whmatrixextms-trna.py)** Python script to plot tRNA model results.
+* **1. [whmatrixextms-benchmarkin.ipynb](whmatrixextms-benchmarking.ipynb)** Jupyter Notebook to perform benchmarking analyses and plot heat map representations of matrices.
+* **2. [whmatrixextms-validations.ipynb](whmatrixextms-validations.ipynb)** Jupyter Notebook to reformat published background-averaged epistatic coefficients and simulate multiallelic genetic landscape.
+* **3. [whmatrixextms.py](whmatrixextms.py)** Python script to fit sparse models to the fitness landscapes.
+* **4. [whmatrixextms_plot.py](whmatrixextms_plot.py)** Python script to plot model results.
 
 # Required Software
 
@@ -16,5 +17,7 @@ You will need the following dependencies installed:
 
 # Required Data
 
-tRNA DMS data (fitness estimates) pre-processed with [DiMSum](https://github.com/lehner-lab/DiMSum) can be downloaded from [here](https://www.dropbox.com/s/1e6bhgi7gf6nrur/JD_Phylogeny_tR-R-CCU_dimsum1.3_fitness_replicates.RData?dl=0).
+DMS data (fitness estimates) and additional files required to run the above analyses can be downloaded from [here](https://www.dropbox.com/scl/fi/441zb6avxczuer6z6axb6/Data.zip?rlkey=73we7pwojjc4n756nostlb4wa&dl=0).
+
+Bash scripts with command-line options for fitting sparse models to fitness landscape for each dataset are also included in this repository.
 
