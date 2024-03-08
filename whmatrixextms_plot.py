@@ -610,7 +610,7 @@ def plot_validation_scatter(
     model_dir,
     plot_dir,
     nonzero_perc_threshold = 0.8,
-    max_order = 3,
+    max_order = 10,
     test_perc = 36,
     model_type = 'ensemble'):
     """
@@ -620,7 +620,7 @@ def plot_validation_scatter(
     :param model_dir: path to model directory. (required).
     :param plot_dir: path to plot directory. (required).
     :param nonzero_perc_threshold: vector of values. (default:0.8).
-    :param max_order: maximum coefficient order. (default:3).
+    :param max_order: maximum coefficient order. (default:10).
     :param test_perc: model test percentage. (default:36).
     :param model_type: model type: ensemble or 1hot. (required).
     :returns: nothing.
@@ -635,10 +635,13 @@ def plot_validation_scatter(
     coef_df = pd.DataFrame({
         "id": lasso_m.feature_names,
         "coef_": np.median(pd.DataFrame(temp_dict), axis = 1),
+        "iqr_min": np.median(pd.DataFrame(temp_dict), axis = 1)-np.quantile(pd.DataFrame(temp_dict), 0.25, axis = 1),
+        "iqr_max": np.quantile(pd.DataFrame(temp_dict), 0.75, axis = 1)-np.median(pd.DataFrame(temp_dict), axis = 1),
         "percnz": np.sum(pd.DataFrame(temp_dict)!=0, axis = 1)/100})
-    input_df = input_df.merge(coef_df, on = 'id')
+    plot_df = input_df.merge(coef_df, on = 'id')
     #Plot
-    plot_df = input_df.loc[(input_df['percnz'] > nonzero_perc_threshold) & (input_df['coef_order'] <= max_order),:]
+    plot_df = plot_df.loc[(plot_df['coef_'] != 0) & (plot_df['coef_order'] <= max_order) & (np.sign(plot_df['coef_']-plot_df['iqr_min']) == np.sign(plot_df['coef_']+plot_df['iqr_max'])),:]
+    plot_df.to_csv(os.path.join(plot_dir, 'validation_scatter_BA_' + model_type + '_testp' + test_perc + '.txt'), sep = '\t', index = False)
     plot_df_dict = {
         '2nd-order': plot_df.loc[plot_df['coef_order']==2,:],
         '1st-order': plot_df.loc[plot_df['coef_order']==1,:],
@@ -655,16 +658,20 @@ def plot_validation_scatter(
         ax = fig.add_subplot()
         for i in plot_df_dict.keys():
             plt.plot(plot_df_dict[i]['coef_BA'], plot_df_dict[i]['coef_'], '.', label = i,
-                     color = color_dict[i], linewidth=0)
-        corr_coef_BA = np.round(np.corrcoef(plot_df["coef_BA"], plot_df["coef_"])[0,1], 2)
-        x = plot_df['coef_BA']
-        y = plot_df['coef_']
+                color = color_dict[i], linewidth=0)
+            plt.errorbar(plot_df_dict[i]['coef_BA'], plot_df_dict[i]['coef_'],
+                color = color_dict[i], yerr = [plot_df_dict[i]['iqr_min'], plot_df_dict[i]['iqr_max']], fmt ='none')        
+        corr_coef_BA = np.round(np.corrcoef(plot_df.loc[plot_df['coef_order'] <= 3,"coef_BA"], plot_df.loc[plot_df['coef_order'] <= 3,"coef_"])[0,1], 2)
+        corr_coef_BA_all = np.round(np.corrcoef(plot_df["coef_BA"], plot_df["coef_"])[0,1], 2)
+        x = plot_df.loc[plot_df['coef_order'] <= 3,'coef_BA']
+        y = plot_df.loc[plot_df['coef_order'] <= 3,'coef_']
         coef = np.polyfit(x, y,1)
         poly1d_fn = np.poly1d(coef) 
         plt.plot(np.asarray([min(x), max(x)]), poly1d_fn(np.asarray([min(x), max(x)])), ':', color = 'black', markersize = 8)
         plt.xlabel("Coefficient (validation)")
         plt.ylabel("Median coefficient")
         plt.text(0, 0, 'r = '+str(corr_coef_BA), fontsize=12)
+        plt.text(0, 0, 'r = '+str(corr_coef_BA_all), fontsize=12, color = 'grey')
         plt.axhline(color = 'black')
         plt.axvline(color = 'black')
         plt.legend()
@@ -676,16 +683,20 @@ def plot_validation_scatter(
         ax = fig.add_subplot()
         for i in plot_df_dict.keys():
             plt.plot(plot_df_dict[i]['coef_BR'], plot_df_dict[i]['coef_'], '.', label = i,
-                     color = color_dict[i], linewidth=0)
-        corr_coef_BR = np.round(np.corrcoef(plot_df["coef_BR"], plot_df["coef_"])[0,1], 2)
-        x = plot_df['coef_BR']
-        y = plot_df['coef_']
+                color = color_dict[i], linewidth=0)
+            plt.errorbar(plot_df_dict[i]['coef_BR'], plot_df_dict[i]['coef_'],
+                color = color_dict[i], yerr = [plot_df_dict[i]['iqr_min'], plot_df_dict[i]['iqr_max']], fmt ='none')        
+        corr_coef_BR = np.round(np.corrcoef(plot_df.loc[plot_df['coef_order'] <= 3,"coef_BR"], plot_df.loc[plot_df['coef_order'] <= 3,"coef_"])[0,1], 2)
+        corr_coef_BR_all = np.round(np.corrcoef(plot_df["coef_BR"], plot_df["coef_"])[0,1], 2)
+        x = plot_df.loc[plot_df['coef_order'] <= 3,'coef_BR']
+        y = plot_df.loc[plot_df['coef_order'] <= 3,'coef_']
         coef = np.polyfit(x, y,1)
         poly1d_fn = np.poly1d(coef) 
         plt.plot(np.asarray([min(x), max(x)]), poly1d_fn(np.asarray([min(x), max(x)])), ':', color = 'black', markersize = 8)
         plt.xlabel("Coefficient (validation)")
         plt.ylabel("Median coefficient")
         plt.text(0, 0, 'r = '+str(corr_coef_BR), fontsize=12)
+        plt.text(0, 0, 'r = '+str(corr_coef_BR_all), fontsize=12, color = 'grey')
         plt.axhline(color = 'black')
         plt.axvline(color = 'black')
         plt.legend()
@@ -706,21 +717,6 @@ def main():
     #Get command line arguments
     parser = init_argparse()
     args = parser.parse_args()
-    # args.dataset = 'trna'
-    # args.fitness_file = '/users/project/prj004631/afaure/DMS/dimsumrun_JD_Phylogeny_tR-R-CCU/JD_Phylogeny_tR-R-CCU_dimsum1.3/JD_Phylogeny_tR-R-CCU_dimsum1.3_fitness_replicates.txt'
-    # args.output_dir = 'output_tRNA'
-    # args.plot_dir = 'plots_tRNA'    
-    # args.validation_file = 'validation/EpGlobal_FDRall_reformat.txt'    
-    # args.dataset = 'eqFP611'
-    # args.fitness_file = '/users/project/prj004631/afaure/DMS/Results/mochi/eqFP611/41467_2019_12130_MOESM7_ESM_edit_dimsum_noNA.txt'
-    # args.output_dir = 'output_eqFP611'
-    # args.plot_dir = 'plots_eqFP611'    
-    # args.validation_file = 'validation/41467_2019_12130_MOESM7_ESM_edit_dimsum_noNA_coef.txt'    
-    # args.dataset = 'simulated'
-    # args.fitness_file = 'simulated/simulated_comb6mer_BA_noise1.txt'
-    # args.output_dir = 'output_simulated_BA_noise1'
-    # args.plot_dir = 'plots_simulated_BA_noise1'    
-    # args.validation_file = 'validation/simulated_comb6mer_BA_noise1.txt'    
 
     #Globals
     fitness_file = args.fitness_file
